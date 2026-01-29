@@ -20,10 +20,7 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Middlewares de sécurité
-app.use(helmet());
-
-// Manual CORS headers for Vercel serverless compatibility
+// Manual CORS headers FIRST (before any other middleware)
 app.use((req, res, next) => {
   const allowedOrigin = process.env.CORS_ORIGIN || 'http://localhost:3000';
   res.setHeader('Access-Control-Allow-Origin', allowedOrigin);
@@ -38,6 +35,11 @@ app.use((req, res, next) => {
 
   next();
 });
+
+// Middlewares de sécurité (configured to not interfere with CORS)
+app.use(helmet({
+  crossOriginResourcePolicy: false,
+}));
 
 // CORS (keeping as fallback)
 app.use(cors({
