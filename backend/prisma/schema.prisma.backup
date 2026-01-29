@@ -1,0 +1,278 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model appointment {
+  id                  String              @id
+  patientId           String
+  professionalId      String
+  availabilityId      String              @unique(map: "Appointment_availabilityId_key")
+  status              appointment_status  @default(PENDING)
+  reason              String?
+  notes               String?
+  isSolidarity        Boolean             @default(false)
+  isPaid              Boolean             @default(false)
+  amount              Float               @default(0)
+  reminderSent        Boolean             @default(false)
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime
+  availability        availability        @relation(fields: [availabilityId], references: [id], map: "Appointment_availabilityId_fkey")
+  user                user                @relation(fields: [patientId], references: [id], map: "Appointment_patientId_fkey")
+  professionalprofile professionalprofile @relation(fields: [professionalId], references: [id], map: "Appointment_professionalId_fkey")
+  prescription        prescription?
+  review              review?
+
+  @@index([patientId], map: "Appointment_patientId_idx")
+  @@index([professionalId], map: "Appointment_professionalId_idx")
+  @@index([status], map: "Appointment_status_idx")
+}
+
+model availability {
+  id                  String              @id
+  professionalId      String
+  date                DateTime
+  startTime           String
+  endTime             String
+  isBooked            Boolean             @default(false)
+  isSolidarity        Boolean             @default(false)
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime
+  appointment         appointment?
+  professionalprofile professionalprofile @relation(fields: [professionalId], references: [id], onDelete: Cascade, map: "Availability_professionalId_fkey")
+
+  @@index([isSolidarity], map: "Availability_isSolidarity_idx")
+  @@index([professionalId, date], map: "Availability_professionalId_date_idx")
+}
+
+model donation {
+  id                  String          @id
+  userId              String?
+  amount              Float
+  currency            String          @default("XOF")
+  status              donation_status @default(PENDING)
+  paymentMethod       String
+  paymentProvider     String?
+  transactionId       String?
+  donorName           String?
+  donorEmail          String?
+  donorPhone          String?
+  isAnonymous         Boolean         @default(false)
+  message             String?
+  usedForAppointments Int             @default(0)
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime
+  user                user?           @relation(fields: [userId], references: [id], map: "Donation_userId_fkey")
+
+  @@index([createdAt], map: "Donation_createdAt_idx")
+  @@index([status], map: "Donation_status_idx")
+  @@index([userId], map: "Donation_userId_fkey")
+}
+
+model medicine {
+  id              String          @id
+  pharmacyId      String
+  name            String
+  genericName     String?
+  description     String?
+  category        String
+  price           Float
+  status          medicine_status @default(AVAILABLE)
+  quantity        Int             @default(0)
+  isSolidarity    Boolean         @default(false)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime
+  pharmacyprofile pharmacyprofile @relation(fields: [pharmacyId], references: [id], onDelete: Cascade, map: "Medicine_pharmacyId_fkey")
+
+  @@index([isSolidarity], map: "Medicine_isSolidarity_idx")
+  @@index([name], map: "Medicine_name_idx")
+  @@index([pharmacyId], map: "Medicine_pharmacyId_idx")
+}
+
+model notification {
+  id        String   @id
+  userId    String
+  type      String
+  title     String
+  message   String
+  isRead    Boolean  @default(false)
+  isSent    Boolean  @default(false)
+  relatedId String?
+  createdAt DateTime @default(now())
+  user      user     @relation(fields: [userId], references: [id], onDelete: Cascade, map: "Notification_userId_fkey")
+
+  @@index([userId, isRead], map: "Notification_userId_isRead_idx")
+}
+
+model patientprofile {
+  id               String                 @id
+  userId           String                 @unique(map: "PatientProfile_userId_key")
+  dateOfBirth      DateTime?
+  gender           patientprofile_gender?
+  address          String?
+  city             String?
+  country          String                 @default("Togo")
+  latitude         Float?
+  longitude        Float?
+  bloodType        String?
+  allergies        String?
+  medicalHistory   String?
+  emergencyContact String?
+  emergencyPhone   String?
+  createdAt        DateTime               @default(now())
+  updatedAt        DateTime
+  user             user                   @relation(fields: [userId], references: [id], onDelete: Cascade, map: "PatientProfile_userId_fkey")
+}
+
+model pharmacyprofile {
+  id            String         @id
+  userId        String         @unique(map: "PharmacyProfile_userId_key")
+  pharmacyName  String
+  licenseNumber String         @unique(map: "PharmacyProfile_licenseNumber_key")
+  isVerified    Boolean        @default(false)
+  address       String
+  city          String
+  country       String         @default("Togo")
+  latitude      Float
+  longitude     Float
+  phone         String
+  openingHours  String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime
+  medicine      medicine[]
+  user          user           @relation(fields: [userId], references: [id], onDelete: Cascade, map: "PharmacyProfile_userId_fkey")
+  prescription  prescription[]
+}
+
+model prescription {
+  id              String           @id
+  appointmentId   String           @unique(map: "Prescription_appointmentId_key")
+  pharmacyId      String?
+  medications     String
+  diagnosis       String?
+  notes           String?
+  fileUrl         String?
+  isProcessed     Boolean          @default(false)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime
+  appointment     appointment      @relation(fields: [appointmentId], references: [id], map: "Prescription_appointmentId_fkey")
+  pharmacyprofile pharmacyprofile? @relation(fields: [pharmacyId], references: [id], map: "Prescription_pharmacyId_fkey")
+
+  @@index([pharmacyId], map: "Prescription_pharmacyId_idx")
+}
+
+model professionalprofile {
+  id                   String         @id
+  userId               String         @unique(map: "ProfessionalProfile_userId_key")
+  specialty            String
+  licenseNumber        String         @unique(map: "ProfessionalProfile_licenseNumber_key")
+  isVerified           Boolean        @default(false)
+  clinicName           String?
+  clinicAddress        String
+  city                 String
+  country              String         @default("Togo")
+  latitude             Float
+  longitude            Float
+  consultationFee      Float          @default(0)
+  bio                  String?
+  yearsOfExperience    Int            @default(0)
+  languages            String?        @db.Text
+  workingHours         String?        @db.Text
+  hasSolidaritySlots   Boolean        @default(false)
+  solidarityPercentage Float          @default(0)
+  createdAt            DateTime       @default(now())
+  updatedAt            DateTime
+  appointment          appointment[]
+  availability         availability[]
+  user                 user           @relation(fields: [userId], references: [id], onDelete: Cascade, map: "ProfessionalProfile_userId_fkey")
+  review               review[]
+}
+
+model review {
+  id                  String              @id
+  appointmentId       String              @unique(map: "Review_appointmentId_key")
+  professionalId      String
+  rating              Int
+  comment             String?
+  createdAt           DateTime            @default(now())
+  appointment         appointment         @relation(fields: [appointmentId], references: [id], onDelete: Cascade, map: "Review_appointmentId_fkey")
+  professionalprofile professionalprofile @relation(fields: [professionalId], references: [id], map: "Review_professionalId_fkey")
+
+  @@index([professionalId], map: "Review_professionalId_idx")
+}
+
+model systemstats {
+  id                          String   @id
+  totalUsers                  Int      @default(0)
+  totalPatients               Int      @default(0)
+  totalProfessionals          Int      @default(0)
+  totalPharmacies             Int      @default(0)
+  totalAppointments           Int      @default(0)
+  totalSolidarityAppointments Int      @default(0)
+  totalDonations              Float    @default(0)
+  donationsUsed               Float    @default(0)
+  lastUpdated                 DateTime @default(now())
+
+  @@index([lastUpdated], map: "SystemStats_lastUpdated_idx")
+}
+
+model user {
+  id                  String               @id
+  email               String               @unique(map: "User_email_key")
+  phone               String               @unique(map: "User_phone_key")
+  password            String
+  role                user_role            @default(PATIENT)
+  firstName           String
+  lastName            String
+  isVerified          Boolean              @default(false)
+  isActive            Boolean              @default(true)
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime
+  appointment         appointment[]
+  donation            donation[]
+  notification        notification[]
+  patientprofile      patientprofile?
+  pharmacyprofile     pharmacyprofile?
+  professionalprofile professionalprofile?
+
+  @@index([email], map: "User_email_idx")
+  @@index([phone], map: "User_phone_idx")
+}
+
+enum patientprofile_gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum appointment_status {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+  NO_SHOW
+}
+
+enum donation_status {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+enum user_role {
+  PATIENT
+  PROFESSIONAL
+  PHARMACY
+  ADMIN
+}
+
+enum medicine_status {
+  AVAILABLE
+  OUT_OF_STOCK
+  LOW_STOCK
+}
