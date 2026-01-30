@@ -1,0 +1,196 @@
+@import "tailwindcss";
+
+@theme {
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+
+  --animate-aurora: aurora 60s linear infinite;
+  --animate-float: float 6s ease-in-out infinite;
+
+  @keyframes aurora {
+    0% {
+      background-position: 50% 50%, 50% 50%;
+    }
+
+    100% {
+      background-position: 350% 50%, 350% 50%;
+    }
+  }
+
+  @keyframes float {
+    0% {
+      transform: translateY(0px);
+    }
+
+    50% {
+      transform: translateY(-10px);
+    }
+
+    100% {
+      transform: translateY(0px);
+    }
+  }
+}
+
+/*
+  The following custom properties are declarative and
+  can be used directly in your HTML with utility classes.
+*/
+
+:root {
+  /* LIGHT MODE (Default) */
+  --background: 0 0% 100%;
+  --foreground: 240 10% 3.9%;
+
+  --card: 0 0% 100%;
+  --card-foreground: 240 10% 3.9%;
+
+  --popover: 0 0% 100%;
+  --popover-foreground: 240 10% 3.9%;
+
+  --primary: 252 59% 48%;
+  /* A nice purple for primary */
+  --primary-foreground: 0 0% 98%;
+
+  --secondary: 190 90% 50%;
+  /* Cyan nice for accents */
+  --secondary-foreground: 240 5.9% 10%;
+
+  --muted: 240 4.8% 95.9%;
+  --muted-foreground: 240 3.8% 46.1%;
+
+  --accent: 240 4.8% 95.9%;
+  --accent-foreground: 240 5.9% 10%;
+
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 0 0% 98%;
+
+  --border: 240 5.9% 90%;
+  --input: 240 5.9% 90%;
+  --ring: 240 10% 3.9%;
+
+  --radius: 0.75rem;
+}
+
+.dark {
+  /* DARK MODE */
+  --background: 240 10% 3.9%;
+  --foreground: 0 0% 98%;
+
+  --card: 240 10% 7%;
+  --card-foreground: 0 0% 98%;
+
+  --popover: 240 10% 3.9%;
+  --popover-foreground: 0 0% 98%;
+
+  --primary: 252 59% 48%;
+  --primary-foreground: 0 0% 98%;
+
+  --secondary: 190 90% 50%;
+  --secondary-foreground: 240 5.9% 10%;
+
+  --muted: 240 3.7% 15.9%;
+  --muted-foreground: 240 5% 64.9%;
+
+  --accent: 240 3.7% 15.9%;
+  --accent-foreground: 0 0% 98%;
+
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 0 0% 98%;
+
+  --border: 240 3.7% 15.9%;
+  --input: 240 3.7% 15.9%;
+  --ring: 240 4.9% 83.9%;
+}
+
+@layer base {
+  * {
+    border-color: var(--border);
+    outline-color: var(--ring);
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+  }
+}
+
+/* Glassmorphism Utilities */
+.glass {
+  background-color: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
+}
+
+.dark .glass {
+  background-color: rgba(255, 255, 255, 0.05);
+  /* Very transparent in dark */
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.36);
+}
+
+.glass-card {
+  background-color: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(200, 200, 200, 0.3);
+  border-radius: 0.75rem;
+  transition: all 0.3s ease;
+  color: var(--card-foreground);
+}
+
+.dark .glass-card {
+  background-color: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.glass-card:hover {
+  background-color: rgba(255, 255, 255, 0.7);
+  border-color: rgba(139, 92, 246, 0.3);
+}
+
+.dark .glass-card:hover {
+  background-color: rgba(0, 0, 0, 0.6);
+  border-color: rgba(139, 92, 246, 0.4);
+}
+
+/* Neon Glows */
+.glow-text {
+  text-shadow: none;
+  /* No strong glow in light mode usually, readability first */
+  color: hsl(var(--foreground));
+}
+
+.dark .glow-text {
+  color: hsl(var(--foreground));
+  /* White */
+  text-shadow: 0 0 10px rgba(139, 92, 246, 0.5), 0 0 20px rgba(139, 92, 246, 0.3);
+}
